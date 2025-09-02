@@ -7,6 +7,7 @@ import org.uma.jmetal.util.bounds.Bounds;
 public class MicroRTSSolution extends DefaultDoubleSolution {
     private double agression;
     private double expansion;
+    private double workForce;
 
     public MicroRTSSolution(List<Bounds<Double>> bounds, int numberOfObjectives, int numberOfConstraints) {
         super(bounds, numberOfObjectives, numberOfConstraints);
@@ -20,11 +21,19 @@ public class MicroRTSSolution extends DefaultDoubleSolution {
         return this.expansion;
     }
 
+    public double getWorkForce() {
+        return this.workForce;
+    }
+
     public void setAgression(double agression) {
         this.agression = agression;
     }
 
     public void setExpansion(double expansion) {
         this.expansion = expansion;
+    }
+
+    public void setWorkForce(double workForce) {
+        this.workForce = workForce;
     }
 }
