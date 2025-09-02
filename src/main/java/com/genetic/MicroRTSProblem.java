@@ -2,7 +2,7 @@ package com.genetic;
 
 import org.uma.jmetal.solution.doublesolution.DoubleSolution;
 import org.uma.jmetal.problem.doubleproblem.impl.AbstractDoubleProblem;
-import com.genetic.MicroRTSSolution;
+import org.uma.jmetal.solution.doublesolution.impl.DefaultDoubleSolution;
 import com.genetic.MicroRTSFitness;
 import java.util.List;
 import java.util.Arrays;
@@ -17,21 +17,21 @@ public class MicroRTSProblem extends AbstractDoubleProblem {
         numberOfConstraints(0);
         name("MicroRTSProblem");
 
-        List<Double> lowerLimit = Arrays.asList(0.0, 0.0, 0.0);
-        List<Double> upperLimit = Arrays.asList(1.0, 1.0, 1.0);
-        variableBounds(lowerLimit, upperLimit);
+        List<Double> lowerLimit = Arrays.asList(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        List<Double> upperLimit = Arrays.asList(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 30.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+       variableBounds(lowerLimit, upperLimit);
 
         this.fitnessEvaluator = new MicroRTSFitness();
     }
 
     @Override
     public int numberOfVariables() {
-        return 3;
+        return 16;
     }
 
     @Override
     public DoubleSolution createSolution() {
-        return new MicroRTSSolution(variableBounds(), numberOfObjectives(), numberOfConstraints());
+        return new DefaultDoubleSolution(variableBounds(), numberOfObjectives(), numberOfConstraints());
     }
 
     @Override

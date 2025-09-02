@@ -1,6 +1,8 @@
 package com.runner;
 
 import com.genetic.MicroRTSProblem;
+import com.utils.ParamsView;
+import com.utils.ExportSolution;
 import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAII;
 import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAIIBuilder;
 import org.uma.jmetal.operator.crossover.impl.SBXCrossover;
@@ -13,7 +15,7 @@ import java.util.List;
 
 public class GATest {
     public static void main(String[] args) {
-        MicroRTSProblem problem = new MicroRTSProblem(1);
+        MicroRTSProblem problem = new MicroRTSProblem(100); // value changes the number of instances of the game
 
         double crossoverProbability = 0.8;
         double distributionIndex = 20;
@@ -27,7 +29,7 @@ public class GATest {
         int offspringPopulationSize = populationSize;
         int matingPoolSize = populationSize;
 
-        int maximumEvaluations = 7500;
+        int maximumEvaluations = 750;
 
         BinaryTournamentSelection<DoubleSolution> selection = new BinaryTournamentSelection<>();
 
@@ -46,11 +48,9 @@ public class GATest {
         System.out.println("\n=== FINAL RESULTS ===");
         System.out.println("Final population size: " + population.size());
 
-        System.out.println("\nBest solutions:");
-        for (int i = 0; i < Math.min(5, population.size()); i++) {
-            DoubleSolution solution = population.get(i);
-            System.out.println("Solution " + (i+1) + ": " + solution.variables() +
-                    " | Fitness: " + solution.objectives()[0]);
-        }
+        System.out.println("\nBest solution:");
+        DoubleSolution solution = population.get(0);
+        ExportSolution exportSolution = new ExportSolution();
+        exportSolution.exportSolution(solution, "solutions.txt");
     }
 }

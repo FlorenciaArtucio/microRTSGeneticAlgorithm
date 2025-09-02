@@ -15,13 +15,15 @@ import java.util.ArrayList;
 import ai.abstraction.pathfinding.PathFinding;
 import ai.core.ParameterSpecification;
 import rts.PhysicalGameState;
+import com.utils.ParamsView;
+import org.uma.jmetal.solution.doublesolution.DoubleSolution;
+import com.genetic.utils.Distance;
 
 public class GeneticAI extends AbstractionLayerAI {
     Random r = new Random();
-    private double agression;
-    private double expansion;
-    private double workForce;
+    private ParamsView P;
     protected UnitTypeTable utt;
+    private DoubleSolution solution;
     UnitType resourceType;
     UnitType baseType;
     UnitType barracksType;
@@ -29,8 +31,9 @@ public class GeneticAI extends AbstractionLayerAI {
     UnitType lightType;
     UnitType heavyType;
     UnitType rangedType;
+    Distance distance = new Distance();
 
-    public GeneticAI(UnitTypeTable a_utt, double agression, double expansion, double workForce) {
+    public GeneticAI(UnitTypeTable a_utt, DoubleSolution solution) {
         super(new AStarPathFinding());
         utt = a_utt;
         resourceType = utt.getUnitType("Resource");
@@ -40,9 +43,8 @@ public class GeneticAI extends AbstractionLayerAI {
         lightType = utt.getUnitType("Light");
         heavyType = utt.getUnitType("Heavy");
         rangedType = utt.getUnitType("Ranged");
-        this.agression = agression;
-        this.expansion = expansion;
-        this.workForce = workForce;
+        this.P = new ParamsView(solution);
+        this.solution = solution;
     }
 
     public void reset() {
@@ -50,7 +52,7 @@ public class GeneticAI extends AbstractionLayerAI {
     }
 
     public AI clone() {
-        return new GeneticAI(utt, agression, expansion, workForce);
+        return new GeneticAI(utt, solution);
     }
 
     public PlayerAction getAction(int player, GameState gs) {
@@ -94,20 +96,20 @@ public class GeneticAI extends AbstractionLayerAI {
 
     public void workerBehavior(Unit u, Player p, GameState gs) {
         float f = r.nextFloat();
-        if (f < agression) {
-            Unit closestEnemy = findClosestEnemy(u, gs, p);
+        if (f < P.getG_AGGR()) {
+            Unit closestEnemy = distance.findClosestUnit(u, gs, p, null, -1);
             if (closestEnemy != null) {
                 attack(u, closestEnemy);
                 return;
             }
         }
         // otherwise, it can either build or harvest
-        if (f < agression + expansion) {
+        if (f < P.getG_AGGR() + P.getG_EXPAND()) {
             build(u, resourceType, u.getX(), u.getY());
             return;
         } else {
-            Unit closestResource = findClosestResource(u, gs, p);
-            Unit closestBase = findClosestBase(u, gs, p);
+            Unit closestResource = distance.findClosestUnit(u, gs, p, resourceType, null);
+            Unit closestBase = distance.findClosestUnit(u, gs, p, baseType, null);
             harvest(u, closestResource, closestBase);
             return;
         }
@@ -122,7 +124,7 @@ public class GeneticAI extends AbstractionLayerAI {
                 nworkers++;
             }
         }
-        if (f < workForce && p.getResources() >= workerType.cost) {
+        if (f < P.getWORKER_CAP() && p.getResources() >= workerType.cost) {
             train(u, workerType);
         }
     }
@@ -134,55 +136,6 @@ public class GeneticAI extends AbstractionLayerAI {
     public void heavyBehavior(Unit u, Player p, GameState gs) {}
 
     public void rangedBehavior(Unit u, Player p, GameState gs) {}
-
-    private Unit findClosestEnemy(Unit u, GameState gs, Player p) {
-        PhysicalGameState pgs = gs.getPhysicalGameState();
-        Unit closestEnemy = null;
-        int closestDistance = 0;
-        for (Unit u2 : pgs.getUnits()) {
-            if (u2.getPlayer() >= 0 && u2.getPlayer() != p.getID()) {
-                int d = Math.abs(u2.getX() - u.getX()) + Math.abs(u2.getY() - u.getY());
-                if (closestEnemy == null || d < closestDistance) {
-                    closestEnemy = u2;
-                    closestDistance = d;
-                }
-            }
-        }
-        return closestEnemy;
-    }
-
-    private Unit findClosestResource(Unit u, GameState gs, Player p) {
-        PhysicalGameState pgs = gs.getPhysicalGameState();
-        Unit closestResource = null;
-        int closestDistance = 0;
-        for (Unit u2 : pgs.getUnits()) {
-            if (u2.getType().isResource) {
-                int d = Math.abs(u2.getX() - u.getX()) + Math.abs(u2.getY() - u.getY());
-                if (closestResource == null || d < closestDistance) {
-                    closestResource = u2;
-                    closestDistance = d;
-                }
-            }
-        }
-        return closestResource;
-    }
-
-    private Unit findClosestBase(Unit u, GameState gs, Player p) {
-        PhysicalGameState pgs = gs.getPhysicalGameState();
-        Unit closestBase = null;
-        int closestDistance = 0;
-        for (Unit u2 : pgs.getUnits()) {
-            if (u2.getType() == baseType && u2.getPlayer() != p.getID()) {
-                int d = Math.abs(u2.getX() - u.getX()) + Math.abs(u2.getY() - u.getY());
-
-                if (closestBase == null || d < closestDistance) {
-                    closestBase = u2;
-                    closestDistance = d;
-                }
-            }
-        }
-        return closestBase;
-    }
 
     @Override
     public List<ParameterSpecification> getParameters()

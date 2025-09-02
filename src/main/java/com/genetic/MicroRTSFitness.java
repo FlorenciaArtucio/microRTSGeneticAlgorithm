@@ -9,15 +9,12 @@ import java.lang.Math;
 public class MicroRTSFitness {
     public double evaluateSolution(DoubleSolution solution, int instances) {
         try {
-            double agression = solution.variables().get(0);
-            double expansion = solution.variables().get(1);
-            double workForce = solution.variables().get(2);
 
             // System.out.println("Agression: " + agression + " Expansion: " + expansion + " Work force: " + workForce);
             double totalScore = 0;
 
             for (int i = 0; i < instances; i++) {
-                GameExecutor gameExecutor = new GameExecutor(new UnitTypeTable(), "maps/16x16/basesWorkers16x16.xml", true, false, 5000, 20, agression, expansion, workForce);
+                GameExecutor gameExecutor = new GameExecutor(new UnitTypeTable(), "maps/16x16/basesWorkers16x16.xml", true, false, 5000, 20, solution);
                 GameResult gameResult = gameExecutor.runGame();
                 if (gameResult.getWinner() == -1) {
                     continue;
